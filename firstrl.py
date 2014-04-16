@@ -33,9 +33,9 @@ class Object:
  
     def move(self, dx, dy):
         #move by the given amount
-		if not map[self.x + dx][self.y + dy].blocked:
-			self.x += dx
-			self.y += dy
+        if not map[self.x + dx][self.y + dy].blocked:
+            self.x += dx
+            self.y += dy
 
     def draw(self):
         #set the color and then draw the character that represents this object at its position
@@ -47,12 +47,12 @@ class Object:
         libtcod.console_put_char(con, self.x, self.y, ' ', libtcod.BKGND_NONE)
 
 def make_map():
-	global map
-	
-	#fill map with "unblocked" tiles
-	map = [[ Tile(False)
-		for y in range(MAP_HEIGHT) ]
-			for x in range(MAP_WIDTH) ]
+    global map
+    
+    #fill map with "unblocked" tiles
+    map = [[ Tile(False)
+        for y in range(MAP_HEIGHT) ]
+            for x in range(MAP_WIDTH) ]
     
     #place two pillars to test the map
     map[30][22].blocked = True
@@ -61,9 +61,9 @@ def make_map():
     map[50][22].block_sight = True
 
 def render_all():
-	global color_light_wall
-	global color_light_ground
-			
+    global color_light_wall
+    global color_light_ground
+
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
             wall = map[x][y].block_sight
@@ -71,42 +71,42 @@ def render_all():
                 libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET )
             else:
                 libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET )
-				
-	#draw all objects in the list
-	for object in objects:
-		object.draw()
-		
-	#blit the contents of "con" to the root console and present it
-	libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+                
+    #draw all objects in the list
+    for object in objects:
+        object.draw()
+        
+    #blit the contents of "con" to the root console and present it
+    libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
 def handle_keys():
-	#key = libtcod.console_check_for_keypress()  #real-time
-	key = libtcod.console_check_for_keypress() #turn-based
-	
-	if key.vk == libtcod.KEY_ENTER and key.lalt:
-		#Alt+Enter: toggle fullscreen
-		libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-		
-	elif key.vk == libtcod.KEY_ESCAPE:
-		return True #exit game
-		
-	#movement keys
-	if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-		player.move(0, -1)
-		
-	elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-		player.move(0, 1)
-		
-	elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-		player.move(-1, 0)
-		
-	elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-		player.move(1, 0)
+    #key = libtcod.console_check_for_keypress()  #real-time
+    key = libtcod.console_check_for_keypress() #turn-based
+    
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        #Alt+Enter: toggle fullscreen
+        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+        
+    elif key.vk == libtcod.KEY_ESCAPE:
+        return True #exit game
+        
+    #movement keys
+    if libtcod.console_is_key_pressed(libtcod.KEY_UP):
+        player.move(0, -1)
+        
+    elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+        player.move(0, 1)
+        
+    elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+        player.move(-1, 0)
+        
+    elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+        player.move(1, 0)
 
 #############################################
 # Initialization & Main Loop
 #############################################q
-	
+    
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
@@ -125,17 +125,17 @@ objects = [npc, player]
 make_map()
 
 while not libtcod.console_is_window_closed():
-	
-	#render the screen
-	render_all()
+    
+    #render the screen
+    render_all()
 
-	libtcod.console_flush()
-	
-	#erase all objects at their old locations, before they move
-	for object in objects:
-		object.clear()
-	
-	#handle keys and exit game if needed
-	exit = handle_keys()
-	if exit:
-		break
+    libtcod.console_flush()
+    
+    #erase all objects at their old locations, before they move
+    for object in objects:
+        object.clear()
+    
+    #handle keys and exit game if needed
+    exit = handle_keys()
+    if exit:
+        break
