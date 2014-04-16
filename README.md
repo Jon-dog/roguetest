@@ -1,1 +1,1 @@
-This is a bad game made as a test.
+This is a roguelike engine made by following this tutorial http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
