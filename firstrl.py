@@ -40,7 +40,7 @@ FIREBALL_DAMAGE = 25
 LEVEL_UP_BASE = 200
 LEVEL_UP_FACTOR = 150
 
-FOV_ALGO = 0  # default FOV algorithm
+FOV_ALGO = 12  # default FOV algorithm
 FOV_LIGHT_WALLS = True  # light walls or not
 TORCH_RADIUS = 10
 
@@ -153,7 +153,7 @@ class Object:
     def draw(self):
         #only show if it's visible to the player; or it's set to "always visible" and on an explored tile
         if (libtcod.map_is_in_fov(fov_map, self.x, self.y) or
-            (self.always_visible and map[self.x][self.y].explored)):
+                (self.always_visible and map[self.x][self.y].explored)):
             #set the color and then draw the character that represents this object at its position
             libtcod.console_set_default_foreground(con, self.color)
             libtcod.console_put_char(con, self.x, self.y, self.char, libtcod.BKGND_NONE)
@@ -210,7 +210,7 @@ class Fighter:
                 if function is not None:
                     function(self.owner)
 
-                if self.owner != player:  #yield experience to the player
+                if self.owner != player:  # yield experience to the player
                     player.fighter.xp += self.xp
 
     def heal(self, amount):
@@ -518,7 +518,7 @@ def place_objects(room):
     item_chances['confuse'] = from_dungeon_level([[10, 2]])
     item_chances['sword'] = from_dungeon_level([[5, 4]])
     item_chances['shield'] = from_dungeon_level([[15, 8]])
-    
+
 
     #choose random number of monsters
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
@@ -584,7 +584,7 @@ def place_objects(room):
                 #create a sword
                 equipment_component = Equipment(slot='right hand', power_bonus=3)
                 item = Object(x, y, '/', 'sword', libtcod.sky, equipment=equipment_component)
-                
+
             elif choice == 'shield':
                 #create a shield
                 equipment_component = Equipment(slot='left hand', defense_bonus=1)
@@ -865,6 +865,7 @@ def handle_keys():
 
             return 'didnt-take-turn'
 
+
 def check_level_up():
     #see if the player's experience is enough to level-up
     level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
@@ -904,7 +905,8 @@ def player_death(player):
 def monster_death(monster):
     #transform it into a nasty corpse! it doesn't block, can't be
     #attacked and doesn't move
-    message('The ' + monster.name + ' is dead! You gain ' + str(monster.fighter.xp) + ' experience points.', libtcod.orange)
+    message('The ' + monster.name + ' is dead! You gain ' + str(monster.fighter.xp) + ' experience points.',
+            libtcod.orange)
     monster.char = '%'
     monster.color = libtcod.dark_red
     monster.blocks = False
@@ -916,7 +918,8 @@ def monster_death(monster):
 
 def target_tile(max_range=None):
     global key, mouse
-    #return the position of a tile left-clicked in player's FOV (optionally in a range), or (None,None) if right-clicked.
+    #return the position of a tile left-clicked in player's FOV (optionally in a range),
+    # or (None,None) if right-clicked.
     while True:
         #render the screen. this erases the inventory and shows the names of objects under the mouse.
         libtcod.console_flush()
@@ -1073,6 +1076,7 @@ def new_game():
     inventory.append(obj)
     equipment_component.equip()
     obj.always_visible = True
+
 
 def next_level():
     #advance to the next level
