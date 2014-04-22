@@ -4,8 +4,8 @@ import textwrap
 import shelve
 
 #actual size of the window
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
+SCREEN_WIDTH = 60
+SCREEN_HEIGHT = 32
 
 #size of the map
 MAP_WIDTH = 80
@@ -42,7 +42,7 @@ LEVEL_UP_FACTOR = 150
 
 FOV_ALGO = 12  # default FOV algorithm
 FOV_LIGHT_WALLS = True  # light walls or not
-TskeletonH_RADIUS = 10
+TORCH_RADIUS = 10
 
 LIMIT_FPS = 20  # 20 frames-per-second maximum
 
@@ -51,6 +51,9 @@ color_light_wall = libtcod.Color(130, 110, 50)
 color_dark_ground = libtcod.Color(50, 50, 150)
 color_light_ground = libtcod.Color(200, 180, 50)
 
+wall_tile = 256  #first tile in the first row of tiles
+mage_tile = 256 + 32  #first tile in the 2nd row of tiles
+skeleton_tile = 256 + 32 + 1  #2nd tile in the 2nd row of tiles
 
 class Tile:
     #a tile of the map and its properties
@@ -461,7 +464,7 @@ def make_map():
     #create stairs at the center of the last room
     stairs = Object(new_x, new_y, '<', 'stairs', libtcod.white, always_visible=True)
     objects.append(stairs)
-    stairs.send_to_back()  # so it's drawn below monsters
+    stairs.send_to_back()  # so it's drawn below the monsters
 
 
 def random_choice_index(chances):  # choose one option from list of chances, returning its index
@@ -504,8 +507,8 @@ def place_objects(room):
 
     #chance of each monster
     monster_chances = {}
-    monster_chances['skeleton'] = 80  # skeleton always shows up, even if all other monsters have 0 chance
-    monster_chances['demon'] = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
+    monster_chances['orc'] = 80  # orc always shows up, even if all other monsters have 0 chance
+    monster_chances['troll'] = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
 
     #maximum number of items per room
     max_items = from_dungeon_level([[1, 1], [2, 4]])
@@ -531,20 +534,20 @@ def place_objects(room):
         #only place it if the tile is not blocked
         if not is_blocked(x, y):
             choice = random_choice(monster_chances)
-            if choice == 'skeleton':
-                #create an skeleton
+            if choice == 'orc':
+                #create an orc
                 fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, death_function=monster_death)
                 ai_component = BasicMonster()
 
-                monster = Object(x, y, 's', 'skeleton', libtcod.dark_gray,
+                monster = Object(x, y, 'o', 'orc', libtcod.desaturated_green,
                                  blocks=True, fighter=fighter_component, ai=ai_component)
 
-            elif choice == 'demon':
-                #create a demon
+            elif choice == 'troll':
+                #create a troll
                 fighter_component = Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
                 ai_component = BasicMonster()
 
-                monster = Object(x, y, 'D', 'demon', libtcod.darker_red,
+                monster = Object(x, y, 'T', 'troll', libtcod.darker_green,
                                  blocks=True, fighter=fighter_component, ai=ai_component)
 
             objects.append(monster)
@@ -636,7 +639,7 @@ def render_all():
     if fov_recompute:
         #recompute FOV if needed (the player moved or something)
         fov_recompute = False
-        libtcod.map_compute_fov(fov_map, player.x, player.y, TskeletonH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+        libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
 
         #go through all tiles, and set their background color according to the FOV
         for y in range(MAP_HEIGHT):
@@ -1052,7 +1055,7 @@ def new_game():
 
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=1, power=2, xp=0, death_function=player_death)
-    player = Object(0, 0, '@', 'player', libtcod.white, blocks=True, fighter=fighter_component)
+    player = Object(0, 0, mage_tile, 'player', libtcod.white, blocks=True, fighter=fighter_component)
 
     player.level = 1
 
@@ -1140,11 +1143,11 @@ def play_game():
 
 
 def main_menu():
-    img = libtcod.image_load('menu_background.png')
+    #img = libtcod.image_load('menu_background.png')
 
     while not libtcod.console_is_window_closed():
         #show the background image, at twice the regular console resolution
-        libtcod.image_blit_2x(img, 0, 0, 0)
+        #libtcod.image_blit_2x(img, 0, 0, 0)
 
         #show the game's title, and some credits!
         libtcod.console_set_default_foreground(0, libtcod.light_yellow)
@@ -1169,11 +1172,13 @@ def main_menu():
         elif choice == 2:  # quit
             break
 
-
-libtcod.console_set_custom_font('terminal10x10_gs_tc.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+libtcod.console_set_custom_font('oryx_tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Rogue Test', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+
+libtcod.console_map_ascii_codes_to_font(256, 32, 0, 5)  #map all characters in 1st row
+libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
 
 main_menu()

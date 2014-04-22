@@ -1,0 +1,37 @@
+================
+Playing the game
+================
+
+To play the game you will need Python 2.7.x installed https://www.python.org/download/releases/2.7.6
+
+After installing Python double click on roguetest.py to run the game.
+
+========
+Controls
+========
+
+arrow keys + numpad to move
+
+5 to wait
+
+g to pickup
+
+i to open inventory
+
+esc to save and quit current game
+
+all other controls are labelled as necessary
+
+=====
+Links
+=====
+
+New versions of the game can be downloaded from here https://github.com/Jon-dog/roguetest
+
+=======
+Credits
+=======
+
+Programmer, Designer, Artist
+
+Jonathon Morald
