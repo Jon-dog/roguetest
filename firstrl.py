@@ -23,8 +23,8 @@ CHARACTER_SCREEN_WIDTH = 30
 LEVEL_SCREEN_WIDTH = 40
 
 #parameters for dungeon generator
-ROOM_MAX_SIZE = 10
-ROOM_MIN_SIZE = 6
+ROOM_MAX_SIZE = 16
+ROOM_MIN_SIZE = 4
 MAX_ROOMS = 30
 
 #spell values
@@ -1166,7 +1166,7 @@ def main_menu():
             break
 
 
-libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+libtcod.console_set_custom_font('terminal10x10_gs_tc.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
