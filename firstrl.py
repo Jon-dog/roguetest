@@ -12,8 +12,8 @@ CAMERA_WIDTH = 60
 CAMERA_HEIGHT = 33
 
 #size of the map
-MAP_WIDTH = 100
-MAP_HEIGHT = 100
+MAP_WIDTH = 60
+MAP_HEIGHT = 50
 
 #sizes and coordinates relevant for the GUI
 BAR_WIDTH = 20
@@ -28,7 +28,7 @@ LEVEL_SCREEN_WIDTH = 40
 
 #parameters for dungeon generator
 ROOM_MAX_SIZE = 16
-ROOM_MIN_SIZE = 4
+ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
 
 #spell values
@@ -40,13 +40,16 @@ CONFUSE_NUM_TURNS = 10
 FIREBALL_RADIUS = 3
 FIREBALL_DAMAGE = 25
 
+#status numbers
+DIZZINESS_TRIGGER = 6
+
 #experience and level-ups
 LEVEL_UP_BASE = 200
 LEVEL_UP_FACTOR = 150
 
 FOV_ALGO = 0  # default FOV algorithm
 FOV_LIGHT_WALLS = True  # light walls or not
-TORCH_RADIUS = 10
+TORCH_RADIUS = 15
 
 LIMIT_FPS = 20  # 20 frames-per-second maximum
 
@@ -126,17 +129,24 @@ class Object:
             self.x += dx
             self.y += dy
 
+    def moveai(self, dx, dy):
+        if not is_blocked(self.x, self.y + dy):
+            self.y += dy
+        if not is_blocked(self.x + dx, self.y):
+            self.x += dx
+
     def move_towards(self, target_x, target_y):
-        #vector from this object to the target, and distance
         dx = target_x - self.x
         dy = target_y - self.y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
-
-        #normalise it to length 1 (preserving direction), then round it and
-        #convert to integer so the movement is restricted to the map grid
-        dx = int(round(dx / distance))
-        dy = int(round(dy / distance))
-        self.move(dx, dy)
+        if dx>0:
+            dx = 1
+        if dx<0:
+            dx = -1
+        if dy>0:
+            dy = 1
+        if dy<0:
+            dy = -1
+        self.moveai(dx, dy)
 
     def distance_to(self, other):
         #return the distance to another object
@@ -835,6 +845,22 @@ def inventory_menu(header):
 def msgbox(text, width=50):
     menu(text, [], width)  #use menu() as a sort of "message box"
 
+def dizziness():
+    global rollcounter
+    #makes the character dizzy after rolling too many times
+    rollcounter = 0
+    if rollcounter >= 6:
+        message('you are now dizzy', libtcod.white)
+
+def increase_dizziness():
+    global rollcounter
+
+    rollcounter += 2
+
+def reduce_dizziness():
+    global rollcounter
+
+    rollcounter -= 1
 
 def handle_keys():
     global key
@@ -902,6 +928,11 @@ def handle_keys():
                 #go down stairs, if the player is on them
                 if stairs.x == player.x and stairs.y == player.y:
                     next_level()
+
+            if key_char == 'f':
+                #roll in a direction
+                player_move_or_attack(0, -2)
+                increase_dizziness()
 
             return 'didnt-take-turn'
 
