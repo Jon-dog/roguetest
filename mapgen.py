@@ -1,55 +1,21 @@
-import firstrl
 import libtcodpy as libtcod
-
-#parameters for dungeon generator
-ROOM_MAX_SIZE = 16
-ROOM_MIN_SIZE = 6
-MAX_ROOMS = 30
-
-
-class Rect:
-    #a rectangle on the map. used to characterise a room.
-    def __init__(self, x, y, w, h):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + w
-        self.y2 = y + h
-
-    def center(self):
-        center_x = (self.x1 + self.x2) / 2
-        center_y = (self.y1 + self.y2) / 2
-        return (center_x, center_y)
-
-    def intersect(self, other):
-        #returns true if this rectangle intersects with another one
-        return (self.x1 <= other.x2 and self.x2 >= other.x1 and
-                self.y1 <= other.y2 and self.y2 >= other.y1)
-
-
-class Tile:
-    #a tile of the map and its properties
-    def __init__(self, blocked, block_sight=None):
-        self.blocked = blocked
-
-        #all tiles start unexplored
-        self.explored = False
-
-        #by default, if a tile is blocked, it also blocks sight
-        if block_sight is None: block_sight = blocked
-        self.block_sight = block_sight
+import firstrl
 
 
 def is_blocked(x, y):
     #first test the map tile
-    if map[x][y].blocked:
+    if firstrl.map[x][y].blocked:
         return True
 
     #now check for any blocking objects
-    for object in objects:
+    for firstrl.object in firstrl.objects:
         if object.blocks and object.x == x and object.y == y:
             return True
 
     return False
+
+
+map = firstrl.map
 
 
 def create_room(room):
@@ -75,81 +41,6 @@ def create_v_tunnel(y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         map[x][y].blocked = False
         map[x][y].block_sight = False
-
-
-def make_map():
-    global map, objects, stairs
-
-    #the list of objects with just the player
-    objects = [firstrl.Object.player]
-
-    #fill map with "blocked" tiles
-    map = [[Tile(True)
-            for y in range(firstrl.MAP_HEIGHT)]
-           for x in range(firstrl.MAP_WIDTH)]
-
-    rooms = []
-    num_rooms = 0
-
-    for r in range(MAX_ROOMS):
-        #random width and height
-        w = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-        h = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-        #random position without going out of the boundaries of the map
-        x = libtcod.random_get_int(0, 0, firstrl.MAP_WIDTH - w - 1)
-        y = libtcod.random_get_int(0, 0, firstrl.MAP_HEIGHT - h - 1)
-
-        #"Rect" class makes rectangles easier to work with
-        new_room = Rect(x, y, w, h)
-
-        #run through the other rooms and see if they intersect with this one
-        failed = False
-        for other_room in rooms:
-            if new_room.intersect(other_room):
-                failed = True
-                break
-
-        if not failed:
-            #this means there are no intersections, so this room is valid
-
-            #"paint" it to the map's tiles
-            create_room(new_room)
-
-            #add some contents to this room, such as monsters
-            place_objects(new_room)
-
-            #center coordinates of new room, will be useful later
-            (new_x, new_y) = new_room.center()
-
-            if num_rooms == 0:
-                #this is the first room, where the player starts at
-                firstrl.Object.player.x = new_x
-                firstrl.Object.player.y = new_y
-            else:
-                #all rooms after the first:
-                #connect it to the previous room with a tunnel
-
-                #center coordinates of previous room
-                (prev_x, prev_y) = rooms[num_rooms - 1].center()
-
-                #draw a coin (random number that is either 0 or 1)
-                if libtcod.random_get_int(0, 0, 1) == 1:
-                    #first move horizontally, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
-                else:
-                    #first move vertically, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
-
-            #finally, append the new room to the list
-            rooms.append(new_room)
-            num_rooms += 1
-
-    #create stairs at the center of the last room
-    stairs = firstrl.Object(new_x, new_y, '<', 'stairs', libtcod.white, always_visible=True)
-    objects.append(stairs)
-    stairs.send_to_back()  # so it's drawn below monsters
 
 
 def random_choice_index(chances):  # choose one option from list of chances, returning its index
@@ -179,7 +70,7 @@ def random_choice(chances_dict):
 def from_dungeon_level(table):
     #returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
     for (value, level) in reversed(table):
-        if firstrl.new_game.dungeon_level >= level:
+        if firstrl.dungeon_level >= level:
             return value
     return 0
 
@@ -236,7 +127,7 @@ def place_objects(room):
                 monster = firstrl.Object(x, y, 'D', 'demon', libtcod.darker_red,
                                          blocks=True, fighter=fighter_component, ai=ai_component)
 
-            objects.append(monster)
+            firstrl.objects.append(monster)
 
     #choose random number of items
     num_items = libtcod.random_get_int(0, 0, max_items)
@@ -279,6 +170,6 @@ def place_objects(room):
                 equipment_component = firstrl.Equipment(slot='left hand', defense_bonus=1)
                 item = firstrl.Object(x, y, '[', 'riot shield', libtcod.darker_orange, equipment=equipment_component)
 
-            objects.append(item)
+            firstrl.objects.append(item)
             item.send_to_back()  # items appear below other objects
             item.always_visible = True  # items are visible even out-of-FOV, if in an explored area
