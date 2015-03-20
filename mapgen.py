@@ -1,26 +1,22 @@
-import libtcodpy as libtcod
-import firstrl
-
+from firstrl import *
+from main import *
 
 def is_blocked(x, y):
-    #first test the map tile
-    if firstrl.map[x][y].blocked:
+    # first test the map tile
+    if map[x][y].blocked:
         return True
 
     #now check for any blocking objects
-    for firstrl.object in firstrl.objects:
+    for object in objects:
         if object.blocks and object.x == x and object.y == y:
             return True
 
     return False
 
 
-map = firstrl.map
-
-
 def create_room(room):
     global map
-    #go through the tiles in the rectangle and make them passable
+    # go through the tiles in the rectangle and make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
             map[x][y].blocked = False
@@ -29,7 +25,7 @@ def create_room(room):
 
 def create_h_tunnel(x1, x2, y):
     global map
-    #horizontal tunnel. min() and max() are used in case x1>x2
+    # horizontal tunnel. min() and max() are used in case x1>x2
     for x in range(min(x1, x2), max(x1, x2) + 1):
         map[x][y].blocked = False
         map[x][y].block_sight = False
@@ -37,14 +33,14 @@ def create_h_tunnel(x1, x2, y):
 
 def create_v_tunnel(y1, y2, x):
     global map
-    #vertical tunnel
+    # vertical tunnel
     for y in range(min(y1, y2), max(y1, y2) + 1):
         map[x][y].blocked = False
         map[x][y].block_sight = False
 
 
 def random_choice_index(chances):  # choose one option from list of chances, returning its index
-    #the dice will land on some number between 1 and the sum of the chances
+    # the dice will land on some number between 1 and the sum of the chances
     dice = libtcod.random_get_int(0, 1, sum(chances))
 
     #go through all chances, keeping the sum so far
@@ -60,7 +56,7 @@ def random_choice_index(chances):  # choose one option from list of chances, ret
 
 
 def random_choice(chances_dict):
-    #choose one option from dictionary of chances, returning its key
+    # choose one option from dictionary of chances, returning its key
     chances = chances_dict.values()
     strings = chances_dict.keys()
 
@@ -68,15 +64,15 @@ def random_choice(chances_dict):
 
 
 def from_dungeon_level(table):
-    #returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
+    # returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
     for (value, level) in reversed(table):
-        if firstrl.dungeon_level >= level:
+        if dungeon_level >= level:
             return value
     return 0
 
 
 def place_objects(room):
-    #this is where we decide the chance of each monster or item appearing.
+    # this is where we decide the chance of each monster or item appearing.
 
     #maximum number of monsters per room
     max_monsters = from_dungeon_level([[2, 1], [3, 4], [5, 6]])
@@ -111,23 +107,23 @@ def place_objects(room):
             choice = random_choice(monster_chances)
             if choice == 'skeleton':
                 #create an skeleton
-                fighter_component = firstrl.Fighter(hp=20, defense=0, power=4, xp=35,
-                                                    death_function=firstrl.monster_death)
-                ai_component = firstrl.BasicMonster()
+                fighter_component = Fighter(hp=20, defense=0, power=4, xp=35,
+                                                    death_function=monster_death)
+                ai_component = BasicMonster()
 
-                monster = firstrl.Object(x, y, 's', 'skeleton', libtcod.dark_gray, blocks=True,
+                monster = Object(x, y, 's', 'skeleton', libtcod.dark_gray, blocks=True,
                                          fighter=fighter_component, ai=ai_component)
 
             elif choice == 'demon':
                 #create a demon
-                fighter_component = firstrl.Fighter(hp=30, defense=2, power=8, xp=100,
-                                                    death_function=firstrl.monster_death)
-                ai_component = firstrl.BasicMonster()
+                fighter_component = Fighter(hp=30, defense=2, power=8, xp=100,
+                                                    death_function=monster_death)
+                ai_component = BasicMonster()
 
-                monster = firstrl.Object(x, y, 'D', 'demon', libtcod.darker_red,
+                monster = Object(x, y, 'D', 'demon', libtcod.darker_red,
                                          blocks=True, fighter=fighter_component, ai=ai_component)
 
-            firstrl.objects.append(monster)
+            objects.append(monster)
 
     #choose random number of items
     num_items = libtcod.random_get_int(0, 0, max_items)
@@ -142,8 +138,8 @@ def place_objects(room):
             choice = random_choice(item_chances)
             if choice == 'heal':
                 #create a healing potion
-                item_component = firstrl.Item(use_function=firstrl.cast_heal)
-                item = firstrl.Object(x, y, '!', 'bandages', libtcod.violet, item=item_component)
+                item_component = Item(use_function=cast_heal)
+                item = Object(x, y, '!', 'bandages', libtcod.violet, item=item_component)
 
             # elif choice == 'lightning':
             #     #create a lightning bolt scroll
@@ -152,24 +148,24 @@ def place_objects(room):
 
             elif choice == 'fireball':
                 #create a fireball scroll
-                item_component = firstrl.Item(use_function=firstrl.cast_explosive)
-                item = firstrl.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+                item_component = Item(use_function=cast_explosive)
+                item = Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
 
             elif choice == 'confuse':
                 #create a confuse scroll
-                item_component = firstrl.Item(use_function=firstrl.cast_confuse)
-                item = firstrl.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
+                item_component = Item(use_function=cast_confuse)
+                item = Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
 
             elif choice == 'combknife':
                 #create a sword
-                equipment_component = firstrl.Equipment(slot='right hand', power_bonus=3)
-                item = firstrl.Object(x, y, '/', 'combat knife', libtcod.sky, equipment=equipment_component)
+                equipment_component = Equipment(slot='right hand', power_bonus=3)
+                item = Object(x, y, '/', 'combat knife', libtcod.sky, equipment=equipment_component)
 
             elif choice == 'shield':
                 #create a shield
-                equipment_component = firstrl.Equipment(slot='left hand', defense_bonus=1)
-                item = firstrl.Object(x, y, '[', 'riot shield', libtcod.darker_orange, equipment=equipment_component)
+                equipment_component = Equipment(slot='left hand', defense_bonus=1)
+                item = Object(x, y, '[', 'riot shield', libtcod.darker_orange, equipment=equipment_component)
 
-            firstrl.objects.append(item)
+            objects.append(item)
             item.send_to_back()  # items appear below other objects
             item.always_visible = True  # items are visible even out-of-FOV, if in an explored area

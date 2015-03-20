@@ -3,16 +3,18 @@ import math
 import textwrap
 import shelve
 import mapgen
+from main import *
+from loadsave import *
 
-#actual size of the window
+# actual size of the window
 SCREEN_WIDTH = 60
 SCREEN_HEIGHT = 40
 
-#size of the map
+# size of the map
 MAP_WIDTH = 60
 MAP_HEIGHT = 50
 
-#parameters for dungeon generator
+# parameters for dungeon generator
 ROOM_MAX_SIZE = 16
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
@@ -369,7 +371,6 @@ def get_all_equipped(obj):  # returns a list of equipped items
         return []  # other objects have no equipment
 
 
-
 def make_map():
     global map, objects, stairs
 
@@ -501,8 +502,8 @@ def to_camera_coordinates(x, y):
     #convert coordinates on the map to coordinates on the screen
     (x, y) = (x - camera_x, y - camera_y)
 
-    if (x < 0 or y < 0 or x >= CAMERA_WIDTH or y >= CAMERA_HEIGHT):
-        return (None, None)  # if it's outside the view, return nothing
+    if x < 0 or y < 0 or x >= CAMERA_WIDTH or y >= CAMERA_HEIGHT:
+        return None, None  # if it's outside the view, return nothing
 
     return (x, y)
 
@@ -929,9 +930,6 @@ def cast_confuse():
     message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 
 
-
-
-
 def new_game():
     global player, inventory, game_msgs, game_state, dungeon_level
 
@@ -973,9 +971,6 @@ def next_level():
     message('After a resting for a bit you enter the next floor', libtcod.red)
     make_map()  # create a new level
     initialize_fov()
-
-
-
 
 
 def main_menu():

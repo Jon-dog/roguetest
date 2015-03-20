@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+from firstrl import *
 
 def initialize_fov():
     global fov_recompute, fov_map
