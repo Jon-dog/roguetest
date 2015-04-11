@@ -1,5 +1,5 @@
-from firstrl import *
-from main import *
+import firstrl
+import libtcodpy as libtcod
 
 def is_blocked(x, y):
     # first test the map tile
@@ -7,7 +7,7 @@ def is_blocked(x, y):
         return True
 
     #now check for any blocking objects
-    for object in objects:
+    for object in objects.firstrl:
         if object.blocks and object.x == x and object.y == y:
             return True
 
@@ -66,7 +66,7 @@ def random_choice(chances_dict):
 def from_dungeon_level(table):
     # returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
     for (value, level) in reversed(table):
-        if dungeon_level >= level:
+        if firstrl.dungeon_level >= level:
             return value
     return 0
 
